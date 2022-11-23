@@ -4,6 +4,9 @@ import yfinance as yf
 import backtrader.feeds as btfeeds
 from datetime import datetime
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 # Not-working code below:
 # data = btfeeds.YahooFinanceData(dataname="SPY", fromdate=datetime(2016, 6, 25), todate=datetime(2021, 6, 25))
 
