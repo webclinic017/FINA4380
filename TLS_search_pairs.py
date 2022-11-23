@@ -18,8 +18,8 @@ def tls(X,y):
         X = np.array(X)
         y = np.array(y)
     # form cumulative return
-    X = (X-X[0])/X[0]
-    y = (y-y[0])/y[0]
+    X = math.log(X/X[0])
+    y = math.log(y/y[0])
     muX = np.mean(X);muy = np.mean(y)
     c0 = np.inner(X-muX,y-muy)
     c1 = np.inner(X-muX,X-muX)-np.inner(y-muy,y-muy)
