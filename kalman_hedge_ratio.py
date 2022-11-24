@@ -66,4 +66,4 @@ class KalmanFilterPairs():
         self.previous_cov = pred_covariances
         pred_d2 = np.inner(prediction,[1,d1])
         pred_error = d2 - pred_d2
-        return pred_d2 ,pred_error
+        return pred_d2 ,pred_error,pred_covariances
