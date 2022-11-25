@@ -2,9 +2,10 @@ import backtrader as bt
 import numpy as np
 import datetime
 import yfinance as yf
-
+import pandas as pd
+import backtrader.analyzers as btanalyzers
 class KalmanPair(bt.Strategy):
-    params = (("printlog", True), ("quantity", 1000), ("coef", 2))
+    params = (("printlog", True), ("quantity", 1000), ("coef", 1))
 
     def log(self, txt, dt=None, doprint=False):
         """Logging function for strategy"""
@@ -69,7 +70,7 @@ class KalmanPair(bt.Strategy):
         self.P = self.R - K * x.dot(self.R)
 
         sqrt_Q = np.sqrt(Q)
-
+        leverage = 0.06
         if self.position:
             if self.position_type == "long" and e > -self.params.coef*sqrt_Q:
                 self.close(self.data0)
@@ -86,14 +87,14 @@ class KalmanPair(bt.Strategy):
 
         else:
             if e < -self.params.coef*sqrt_Q:
-                self.sell(data=self.data0, size=(self.quantity * self.beta[0]))
-                self.buy(data=self.data1, size=self.quantity)
+                self.sell(data=self.data0, size=leverage*(self.quantity * self.beta[0]))
+                self.buy(data=self.data1, size=leverage*self.quantity)
                 self.position_type = "long"
                 self.log('LONG CREATE, sell stock1, close price %.2f' % self.data0[0])
                 self.log('LONG CREATE, buy stock2 close price %.2f' % self.data1[0])
             if e > self.params.coef*sqrt_Q:
-                self.buy(data=self.data0, size=(self.quantity * self.beta[0]))
-                self.sell(data=self.data1, size=self.quantity)
+                self.buy(data=self.data0, size=leverage*(self.quantity * self.beta[0]))
+                self.sell(data=self.data1, size=leverage*self.quantity)
                 self.log('SHORT CREATE, buy stock1 close price %.2f' % self.data[0])
                 self.log('SHORT CREATE, sell stock2 close price %.2f' % self.data[0])
                 self.position_type = "short"
@@ -104,20 +105,24 @@ class KalmanPair(bt.Strategy):
 def run():
     cerebro = bt.Cerebro()
     cerebro.addstrategy(KalmanPair)
-
-    startdate = datetime.datetime(2019, 1, 1)
+    cerebro.addanalyzer(btanalyzers.SharpeRatio, _name='mysharpe')
+    startdate = datetime.datetime(2016, 1, 1)
     enddate = datetime.datetime(2020, 1, 1)
-
-    ewa = bt.feeds.PandasData(dataname=yf.download('are', startdate, enddate, auto_adjust=True))
-    ewc = bt.feeds.PandasData(dataname=yf.download('tgt', startdate, enddate, auto_adjust=True))
-
+    symbol = pd.read_csv("futures.csv",index_col=False)
+    symbol = list(symbol.iloc[:,0])
+    pair =[1, 20]
+    ewa = bt.feeds.PandasData(dataname=yf.download(symbol[pair[0]],startdate, enddate, auto_adjust=True))
+    ewc = bt.feeds.PandasData(dataname=yf.download(symbol[pair[1]], startdate, enddate, auto_adjust=True))
+    
     cerebro.adddata(ewa)
     cerebro.adddata(ewc)
     # cerebro.broker.setcommission(commission=0.0001)
     cerebro.broker.setcash(100_000.0)
 
     print(f"Starting Portfolio Value: {cerebro.broker.getvalue():.2f}")
-    cerebro.run()
+    thestrats = cerebro.run()[0]
+    print("the pair is {}, {}".format(symbol[pair[0]],symbol[pair[1]]))
+    print('Sharpe Ratio:', thestrats.analyzers.mysharpe.get_analysis())
     print(f"Final Portfolio Value: {cerebro.broker.getvalue():.2f}")
     cerebro.plot()
 

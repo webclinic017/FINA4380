@@ -9,9 +9,10 @@ from scipy.stats import pearsonr
 from statsmodels.tsa.stattools import adfuller
 import warnings
 warnings.filterwarnings('ignore')
-
-tickers = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]
-data = yf.download(tickers.Symbol.to_list(), '2011-01-01', '2012-01-01')["Close"].dropna(axis=1)
+symbol = pd.read_csv("futures.csv",index_col=False)
+symbol = list(symbol.iloc[:,0])
+#symbol = ['EURUSD=X','JPY=X','AUDUSD=X','CNY=X','EURCHF=X','EURCAD=X','NZDUSD=X','GBPUSD=X']
+data = yf.download(symbol,'2011-01-01', '2015-01-01')["Close"].dropna(axis=1)
 
 def tls(X,y):
     if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series) :
