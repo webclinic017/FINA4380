@@ -4,7 +4,7 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 import numpy.linalg as la
-import math
+import np
 from scipy.stats import pearsonr
 from statsmodels.tsa.stattools import adfuller
 
@@ -13,8 +13,8 @@ def tls(X,y):
         X = np.array(X)
         y = np.array(y)
     # form cumulative return
-    X = math.log(X/X[0])
-    y = math.log(y/y[0])
+    X = np.log(X/X[0])
+    y = np.log(y/y[0])
     muX = np.mean(X);muy = np.mean(y)
     c0 = np.inner(X-muX,y-muy)
     c1 = np.inner(X-muX,X-muX)-np.inner(y-muy,y-muy)

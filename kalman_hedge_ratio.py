@@ -13,8 +13,8 @@ def tls(X,y):
         X = np.array(X)
         y = np.array(y)
     # form cumulative return
-    X = math.log(X/X[0])
-    y = math.log(y/y[0])
+    X = np.log(X/X[0])
+    y = np.log(y/y[0])
     muX = np.mean(X);muy = np.mean(y)
     c0 = np.inner(X-muX,y-muy)
     c1 = np.inner(X-muX,X-muX)-np.inner(y-muy,y-muy)
@@ -67,3 +67,8 @@ class KalmanFilterPairs():
         pred_d2 = np.inner(prediction,[1,d1])
         pred_error = d2 - pred_d2
         return pred_d2 ,pred_error,pred_covariances
+    
+tickers = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]
+data = yf.download(tickers.Symbol.to_list(), '2011-01-01', '2012-01-01')["Close"].dropna(axis=1)
+KalmanFilterPairs(data.iloc[:,18],data.iloc[:,34])
+
