@@ -31,6 +31,7 @@ class KalmanFilterPairs():
         self.x = data1
         self.y = data2
         residual,b0,b1= tls(data2,data1)
+        self.b1
         # use the result from tls as observation_matrices
         self.kf = KalmanFilter(initial_state_mean=[b0,b1], 
                   transition_matrices = [[1, 0], [0, 1]],observation_matrices = [1,self.x[0]],
@@ -59,8 +60,8 @@ class KalmanFilterPairs():
         prediction, pred_covariances = (
             self.kf.filter_update(
                 observation_matrix = [1,d1],transition_covariance = self.previous_cov,
-                transition_offsets = 0,observation_offsets = 0,observation = d2,
-                n_dim_obs=1,n_dim_state=2
+                transition_offset = 0,observation_offset = 0,observation = d2,
+                filtered_state_mean = self.b1,filtered_state_covariance = self.previous_cov
                 )
             )
         self.previous_cov = pred_covariances
