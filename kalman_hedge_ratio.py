@@ -58,7 +58,7 @@ class KalmanFilterPairs():
     def iter(self,d1,d2):
         prediction, pred_covariances = (
             self.kf.filter_update(
-                observation_matrices = [1,d1],transition_covariance = self.previous_cov,
+                observation_matrix = [1,d1],transition_covariance = self.previous_cov,
                 transition_offsets = 0,observation_offsets = 0,observation = d2,
                 n_dim_obs=1,n_dim_state=2
                 )

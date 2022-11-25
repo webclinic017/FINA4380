@@ -4,7 +4,6 @@ import yfinance as yf
 import numpy as np
 import pandas as pd
 import numpy.linalg as la
-import np
 from scipy.stats import pearsonr
 from statsmodels.tsa.stattools import adfuller
 
