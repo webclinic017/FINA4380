@@ -30,8 +30,7 @@ class KalmanFilterPairs():
         # use x as para, y as observable variable
         self.x = data1
         self.y = data2
-        residual,b0,b1= tls(data2,data1)
-        self.b1
+        residual,b0,b1= tls(data1,data2)
         # use the result from tls as observation_matrices
         self.kf = KalmanFilter(initial_state_mean=[b0,b1], 
                   transition_matrices = [[1, 0], [0, 1]],observation_matrices = [1,self.x[0]],
@@ -51,25 +50,24 @@ class KalmanFilterPairs():
                 self.kf.filter_update(
                     filtered_state_means[t],
                     filtered_state_covariances[t],
-                    self.x[t + 1]
+                    observation_matrix = np.array([[1],[data1[t]]]).T,
+                    observation = data2[t]
                 )
             )
         self.previous_cov = filtered_state_covariances[-1]
+        self.previous_pred = filtered_state_means[-1]
         
     def iter(self,d1,d2):
+        print(self.previous_cov)
         prediction, pred_covariances = (
             self.kf.filter_update(
-                observation_matrix = [1,d1],transition_covariance = self.previous_cov,
-                transition_offset = 0,observation_offset = 0,observation = d2,
-                filtered_state_mean = self.b1,filtered_state_covariance = self.previous_cov
+                observation_matrix = np.array([[1],[d1]]).T,
+                observation = d2,
+                filtered_state_mean = self.previous_pred,filtered_state_covariance = self.previous_cov
                 )
             )
         self.previous_cov = pred_covariances
+        self.previous_pred = prediction
         pred_d2 = np.inner(prediction,[1,d1])
         pred_error = d2 - pred_d2
         return pred_d2 ,pred_error,pred_covariances
-    
-tickers = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]
-data = yf.download(tickers.Symbol.to_list(), '2011-01-01', '2012-01-01')["Close"].dropna(axis=1)
-KalmanFilterPairs(data.iloc[:,18],data.iloc[:,34])
-
